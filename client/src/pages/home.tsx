@@ -102,7 +102,7 @@ export default function Home() {
       </section>
 
       {/* Categories Grid */}
-      <section className="container mx-auto px-4 md:px-6">
+      <section className="container mx-auto px-4 md:px-6 pb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[600px]">
           <Link href="/shop?category=Sketches">
             <div className="group relative h-full overflow-hidden rounded-lg cursor-pointer">

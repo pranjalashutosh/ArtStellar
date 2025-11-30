@@ -119,12 +119,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 md:pt-32">
+      <main className="flex-1 pt-24 md:pt-32 relative z-0">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground pt-16 pb-8 relative z-10">
+      <footer className="bg-primary text-primary-foreground pt-16 pb-8 relative z-50">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="space-y-4">
