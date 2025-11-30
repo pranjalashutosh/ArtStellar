@@ -19,7 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
       transition={{ duration: 0.4 }}
       className="group relative flex flex-col gap-3"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted isolate transform-gpu">
         <Link href={`/product/${product.id}`} className="block h-full w-full">
             <img
               src={product.image}
