@@ -1,0 +1,106 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Plus Jakarta Sans",
+      "role": "body"
+    },
+    {
+      "family": "Libre Baskerville",
+      "role": "heading"
+    }
+  ],
+  "colors": {
+    "primary": "#203737",
+    "accent": "#FBF7ED",
+    "background": "#FFFFFF",
+    "textPrimary": "#637373",
+    "link": "#637373"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Plus Jakarta Sans",
+      "heading": "Libre Baskerville"
+    },
+    "fontStacks": {
+      "heading": [
+        "Plus JakartaSans",
+        "sans-serif"
+      ],
+      "body": [
+        "Plus JakartaSans",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Plus JakartaSans",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "14px",
+      "h2": "56px",
+      "body": "12px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "10px"
+  },
+  "components": {
+    "input": {
+      "borderColor": "#CCCCCC",
+      "borderRadius": "10px"
+    },
+    "buttonPrimary": {
+      "background": "#203737",
+      "textColor": "#E8EBEB",
+      "borderColor": "#203737",
+      "borderRadius": "120px",
+      "shadow": "none"
+    },
+    "buttonSecondary": {
+      "background": "#FFFFFF",
+      "textColor": "#203737",
+      "borderRadius": "100px",
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "https://bookix.madrasthemes.com/wp-content/themes/bookix/assets/images/logo.svg",
+    "favicon": "https://bookix.madrasthemes.com/wp-content/uploads/2023/10/cropped-fav-32x32.png",
+    "ogImage": null
+  },
+  "__framework_hints": [],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Logo #0 visually represents the brand name 'Bookix' and is located in the header, linking to the homepage, making it the main brand logo.",
+    "confidence": 0.95
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 4,
+      "text": "Learn More <img decoding=\"async\" class=\"wp-image-41 lazyload\" style=\"width: 16px;\" src=\"https://book",
+      "reasoning": "Button #4 has a vibrant brand color (#203737) and action-oriented text ('Learn More'), making it the primary CTA. It stands out due to its color and design."
+    },
+    "secondary": {
+      "index": 0,
+      "text": "Subscribe",
+      "reasoning": "Button #0 has a white background (#FFFFFF) and is less prominent compared to the primary button. It serves as a secondary action with the text 'Subscribe'."
+    },
+    "confidence": 0.95
+  },
+  "personality": {
+    "tone": "modern",
+    "energy": "medium",
+    "targetAudience": "book lovers and readers"
+  },
+  "designSystem": {
+    "framework": "unknown",
+    "componentLibrary": null
+  },
+  "confidence": {
+    "buttons": 0.95,
+    "colors": 0.9,
+    "overall": 0.925
+  }
+}
