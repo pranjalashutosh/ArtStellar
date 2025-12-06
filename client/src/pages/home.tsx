@@ -1,13 +1,20 @@
-import { products } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useProducts } from "@/hooks/use-products";
+import { getProductImage, getCategoryImage } from "@/lib/product-images";
 
 export default function Home() {
-  const featuredProducts = products.slice(0, 3);
-  const newArrivals = products.slice(3, 7);
+  const { data: products, isLoading } = useProducts();
+
+  const featuredProducts =
+    (products?.filter((product) => product.isFeatured) ?? products ?? []).slice(0, 3);
+  const newArrivals =
+    (products?.filter((product) => product.isNew) ?? products ?? []).slice(0, 4);
+
+  const heroImage = getProductImage(featuredProducts[0] ?? products?.[0]);
 
   return (
     <div className="space-y-24 pb-24">
@@ -17,7 +24,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
           <img
-            src={products[1].image} // Using abstract yoga image
+            src={heroImage}
             alt="Hero background"
             className="w-full h-full object-cover object-center opacity-90"
           />
@@ -70,11 +77,20 @@ export default function Home() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+            {featuredProducts.length === 0 && (
+              <p className="text-muted-foreground">No featured pieces yet. Check back soon.</p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Quote Section */}
@@ -94,40 +110,51 @@ export default function Home() {
           <h2 className="font-heading text-3xl md:text-4xl text-primary">New Additions</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {newArrivals.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {newArrivals.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+            {newArrivals.length === 0 && (
+              <p className="text-muted-foreground col-span-full text-center">
+                New artworks are coming soon. Join our newsletter to be the first to know.
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Categories Grid */}
-      <section className="container mx-auto px-4 md:px-6 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[600px]">
+      <section className="container mx-auto px-4 md:px-6 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link href="/shop?category=Sketches">
-            <div className="group relative h-full overflow-hidden rounded-lg cursor-pointer">
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
-              <img src={products[2].image} alt="Sketches" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 z-20 flex items-center justify-center">
+            <div className="group relative h-[300px] md:h-[600px] overflow-hidden rounded-lg cursor-pointer">
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+              <img src={getCategoryImage("Sketches")} alt="Sketches" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 flex items-center justify-center">
                 <h3 className="font-heading text-4xl text-white">Sketches</h3>
               </div>
             </div>
           </Link>
-          <div className="grid grid-rows-2 gap-4 h-full">
+          <div className="grid grid-rows-2 gap-4">
              <Link href="/shop?category=Sculptures">
-              <div className="group relative h-full overflow-hidden rounded-lg cursor-pointer">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
-                <img src={products[4].image} alt="Sculptures" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 z-20 flex items-center justify-center">
+              <div className="group relative h-[300px] md:h-[296px] overflow-hidden rounded-lg cursor-pointer">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <img src={getCategoryImage("Sculptures")} alt="Sculptures" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 flex items-center justify-center">
                   <h3 className="font-heading text-3xl text-white">Sculptures</h3>
                 </div>
               </div>
             </Link>
              <Link href="/shop?category=Abstract">
-              <div className="group relative h-full overflow-hidden rounded-lg cursor-pointer">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
-                <img src={products[6].image} alt="Abstract" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 z-20 flex items-center justify-center">
+              <div className="group relative h-[300px] md:h-[296px] overflow-hidden rounded-lg cursor-pointer">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <img src={getCategoryImage("Abstract")} alt="Abstract" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 flex items-center justify-center">
                   <h3 className="font-heading text-3xl text-white">Abstract</h3>
                 </div>
               </div>

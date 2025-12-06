@@ -4,3 +4,11 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Uploaded files
+uploads/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local

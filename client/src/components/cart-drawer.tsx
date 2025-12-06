@@ -1,16 +1,126 @@
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Minus, ShoppingBag } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/format";
+
+function detectItemType(category: string | undefined, type?: string) {
+  if (type) return type;
+  if (!category) return "physical";
+  return category.toLowerCase() === "digital" ? "digital" : "physical";
+}
 
 export function CartDrawer() {
   const { isOpen, toggleCart, items, removeItem, updateQuantity } = useCart();
-  
+  const { toast } = useToast();
+
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotalLabel = formatCurrency(Math.round(subtotal * 100));
+  const hasPhysicalItems = useMemo(
+    () => items.some((item) => detectItemType(item.category, item.type) === "physical"),
+    [items],
+  );
+  const hasDigitalItems = useMemo(
+    () => items.some((item) => detectItemType(item.category, item.type) === "digital"),
+    [items],
+  );
+
+  const [form, setForm] = useState({
+    email: "",
+    name: "",
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange =
+    (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    };
+
+  async function handleCheckout() {
+    if (items.length === 0) return;
+
+    if (!form.email) {
+      toast({ title: "Email required", description: "Please provide your email to receive order updates.", variant: "destructive" });
+      return;
+    }
+
+    if (hasPhysicalItems) {
+      const requiredFields: Array<keyof typeof form> = ["name", "line1", "city", "state", "postalCode"];
+      for (const field of requiredFields) {
+        if (!form[field]) {
+          toast({ title: "Shipping details incomplete", description: "Please fill in all required shipping fields.", variant: "destructive" });
+          return;
+        }
+      }
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload: any = {
+        items: items.map((item) => ({
+          productId: String(item.id),
+          quantity: item.quantity,
+        })),
+        customerEmail: form.email,
+      };
+
+      if (hasPhysicalItems) {
+        payload.shippingAddress = {
+          name: form.name,
+          line1: form.line1,
+          line2: form.line2 || undefined,
+          city: form.city,
+          state: form.state,
+          postalCode: form.postalCode,
+          country: "US",
+        };
+      }
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Unable to start checkout. Please try again.");
+      }
+
+      const data = await response.json();
+      if (data?.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      } else if (data?.sessionId) {
+        // Fallback to Stripe.js redirect (if needed in future)
+        window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
+      } else {
+        throw new Error("Invalid response from checkout.");
+      }
+    } catch (error: any) {
+      console.error("Checkout error", error);
+      toast({
+        title: "Checkout failed",
+        description: error?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={toggleCart}>
@@ -64,21 +174,25 @@ export function CartDrawer() {
                         </button>
                       </div>
                       <div className="flex justify-between items-center mt-4">
-                        <div className="flex items-center border border-input rounded-full h-8">
-                          <button
-                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                            className="px-2 hover:bg-accent rounded-l-full h-full flex items-center"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-8 text-center text-xs">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="px-2 hover:bg-accent rounded-r-full h-full flex items-center"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
+                        {item.type === "physical" ? (
+                          <div className="text-xs text-muted-foreground">Original (1 of 1)</div>
+                        ) : (
+                          <div className="flex items-center border border-input rounded-full h-8">
+                            <button
+                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                              className="px-2 hover:bg-accent rounded-l-full h-full flex items-center"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-8 text-center text-xs">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="px-2 hover:bg-accent rounded-r-full h-full flex items-center"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
                         <p className="font-medium">${item.price * item.quantity}</p>
                       </div>
                     </div>
@@ -95,7 +209,7 @@ export function CartDrawer() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${subtotal}</span>
+                <span>{subtotalLabel}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
@@ -103,14 +217,120 @@ export function CartDrawer() {
               </div>
               <div className="flex justify-between font-heading text-lg pt-2">
                 <span>Total</span>
-                <span>${subtotal}</span>
+                <span>{subtotalLabel}</span>
               </div>
             </div>
-            <SheetFooter>
-              <Button className="w-full h-12 rounded-full text-base" size="lg">
-                Proceed to Checkout
-              </Button>
-            </SheetFooter>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="checkout-email" className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="checkout-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={handleInputChange("email")}
+                  />
+                </div>
+
+                {hasPhysicalItems && (
+                  <div className="grid gap-3">
+                    <div>
+                      <Label htmlFor="checkout-name" className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Full Name
+                      </Label>
+                      <Input
+                        id="checkout-name"
+                        placeholder="Full name"
+                        value={form.name}
+                        onChange={handleInputChange("name")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="checkout-line1" className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Address Line 1
+                      </Label>
+                      <Input
+                        id="checkout-line1"
+                        placeholder="Street address"
+                        value={form.line1}
+                        onChange={handleInputChange("line1")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="checkout-line2" className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Address Line 2 (optional)
+                      </Label>
+                      <Input
+                        id="checkout-line2"
+                        placeholder="Apartment, suite, etc."
+                        value={form.line2}
+                        onChange={handleInputChange("line2")}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="checkout-city" className="text-xs uppercase tracking-wide text-muted-foreground">
+                          City
+                        </Label>
+                        <Input
+                          id="checkout-city"
+                          placeholder="City"
+                          value={form.city}
+                          onChange={handleInputChange("city")}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="checkout-state" className="text-xs uppercase tracking-wide text-muted-foreground">
+                          State
+                        </Label>
+                        <Input
+                          id="checkout-state"
+                          placeholder="State"
+                          value={form.state}
+                          onChange={handleInputChange("state")}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="checkout-postal" className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Postal Code
+                      </Label>
+                      <Input
+                        id="checkout-postal"
+                        placeholder="ZIP / Postal code"
+                        value={form.postalCode}
+                        onChange={handleInputChange("postalCode")}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <SheetFooter>
+                <Button
+                  className="w-full h-12 rounded-full text-base"
+                  size="lg"
+                  disabled={isSubmitting}
+                  onClick={handleCheckout}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Redirecting...
+                    </span>
+                  ) : (
+                    "Proceed to Checkout"
+                  )}
+                </Button>
+              </SheetFooter>
+              {hasDigitalItems && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Digital downloads will be available immediately after payment.
+                </p>
+              )}
+            </div>
           </div>
         )}
       </SheetContent>

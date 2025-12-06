@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Menu, X, Search, Facebook, Instagram, Twitter } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, Facebook, Instagram, Twitter, User, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
 import { CartDrawer } from "./cart-drawer";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const { toggleCart, items } = useCart();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   useEffect(() => {
@@ -26,6 +36,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/");
+  };
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -114,17 +129,55 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </span>
               )}
             </Button>
+            
+            {/* Auth Menu */}
+            {isAuthenticated() ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-primary hover:bg-accent">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user?.username}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isAdmin() && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer">
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="ghost" className="text-primary hover:bg-accent">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 md:pt-32 relative z-0">
+      <main className="flex-1 pt-24 md:pt-32">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground pt-16 pb-8 relative z-50">
+      <footer className="bg-primary text-primary-foreground pt-16 pb-8">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="space-y-4">
