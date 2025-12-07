@@ -12,7 +12,7 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "seed:admin": "tsx script/seed-admin.ts",
-    "postbuild": "npm run db:push"
+    "postbuild": "node script/postbuild.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
