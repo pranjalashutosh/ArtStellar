@@ -66,8 +66,10 @@ declare module "express-session" {
   }
 }
 
-// Validate required environment variables in production
-if (process.env.NODE_ENV === "production") {
+// Validation function for required environment variables (called during startup)
+function validateProductionEnvVars(): void {
+  if (process.env.NODE_ENV !== "production") return;
+  
   const requiredEnvVars = [
     "DATABASE_URL",
     "SESSION_SECRET",
@@ -75,10 +77,9 @@ if (process.env.NODE_ENV === "production") {
     "STRIPE_WEBHOOK_SECRET",
   ];
 
-  for (const varName of requiredEnvVars) {
-    if (!process.env[varName]) {
-      throw new Error(`Missing required environment variable: ${varName}`);
-    }
+  const missing = requiredEnvVars.filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
   }
 }
 
@@ -194,6 +195,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 (async () => {
   try {
+    // Validate environment variables at startup (after Railway injects them)
+    validateProductionEnvVars();
+    
     await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
