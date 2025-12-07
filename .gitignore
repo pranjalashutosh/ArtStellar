@@ -7,8 +7,49 @@ vite.config.ts.*
 
 # Uploaded files
 uploads/
+!uploads/.gitkeep
+
+# Digital assets (keep structure but not files)
+server/digital-assets/*
+!server/digital-assets/.gitkeep
 
 # Environment files (contain secrets)
 .env
 .env.local
 .env.*.local
+.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.tsbuildinfo
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Misc
+.cache
+temp/
+tmp/

@@ -9,7 +9,10 @@
     "build": "tsx script/build.ts",
     "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "seed:admin": "tsx script/seed-admin.ts",
+    "postbuild": "npm run db:push"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -55,8 +58,10 @@
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.6.0",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.2.1",
     "express-session": "^1.18.1",
     "framer-motion": "^12.23.24",
+    "helmet": "^8.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.545.0",
     "memorystore": "^1.6.7",

@@ -8,6 +8,7 @@
 - `server/auth-routes.ts` - Authentication API endpoints for register, login, logout, and getting current user.
 - `server/passport-config.ts` - Passport.js configuration with local strategy for username/password authentication.
 - `server/auth-middleware.ts` - Authentication and authorization middleware for protecting routes.
+- `server/storage-adapter.ts` - File storage abstraction layer supporting local and cloud storage (S3/R2 ready).
 - `server/types.d.ts` - TypeScript type declarations for extending Express with User type.
 - `client/src/lib/data.ts` - Current static product catalog; will either be replaced by API-backed data or adapted as seed data.
 - `client/src/lib/cart.ts` - Client-side cart state; will be aligned with checkout, stock rules (1-of-1 originals), and order creation.
@@ -34,6 +35,11 @@
 - `server/static.ts` - Static file serving; may be involved in serving digital downloads via secured endpoints.
 - `server/config.ts` - Server configuration module; loads Stripe keys, shipping settings, and other env vars.
 - `docs/stripe-integration.md` - Documentation for Stripe Checkout integration approach and setup.
+- `docs/deployment.md` - Comprehensive deployment guide for Railway, Render, and other platforms.
+- `script/seed-admin.ts` - Utility script for creating admin users in any environment.
+- `.env.example` - Environment variables template with all required and optional configuration.
+- `railway.json` - Railway platform configuration for deployment.
+- `README.md` - Project documentation with setup, development, and deployment instructions.
 
 ### Notes
 
