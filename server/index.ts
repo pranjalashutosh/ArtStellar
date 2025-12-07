@@ -9,6 +9,19 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import path from "path";
 
+// Make sure we get a clear error in the logs if something throws during startup
+process.on("unhandledRejection", (reason) => {
+  // eslint-disable-next-line no-console
+  console.error("UNHANDLED_REJECTION", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("UNCAUGHT_EXCEPTION", err);
+  process.exit(1);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -180,7 +193,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
+  try {
+    await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -198,19 +212,24 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
-  }
+    if (process.env.NODE_ENV === "production") {
+      serveStatic(app);
+    } else {
+      const { setupVite } = await import("./vite");
+      await setupVite(httpServer, app);
+    }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
+    // ALWAYS serve the app on the port specified in the environment variable PORT
+    // Other ports are firewalled. Default to 5000 if not specified.
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = parseInt(process.env.PORT || "5000", 10);
+    httpServer.listen(port, "0.0.0.0", () => {
+      log(`serving on port ${port}`);
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("FATAL_STARTUP_ERROR", err);
+    process.exit(1);
+  }
 })();
