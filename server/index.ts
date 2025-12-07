@@ -77,6 +77,14 @@ function validateProductionEnvVars(): void {
     "STRIPE_WEBHOOK_SECRET",
   ];
 
+  // Debug: Log which env vars are present (masked for security)
+  console.log("Environment variable check:");
+  requiredEnvVars.forEach((name) => {
+    const value = process.env[name];
+    const status = value ? `SET (${value.length} chars)` : "NOT SET";
+    console.log(`  ${name}: ${status}`);
+  });
+
   const missing = requiredEnvVars.filter((name) => !process.env[name]);
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
