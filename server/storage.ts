@@ -365,4 +365,18 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { isDatabaseAvailable } from "./db";
+import { DatabaseStorage } from "./database-storage";
+
+// Use DatabaseStorage when DATABASE_URL is available, otherwise use MemStorage
+function createStorage(): IStorage {
+  if (isDatabaseAvailable()) {
+    console.log("Using DatabaseStorage (PostgreSQL)");
+    return new DatabaseStorage();
+  } else {
+    console.log("Using MemStorage (in-memory - data will not persist!)");
+    return new MemStorage();
+  }
+}
+
+export const storage = createStorage();
