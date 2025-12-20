@@ -97,7 +97,7 @@ const sessionStore = process.env.DATABASE_URL
   ? new PgSession({
       conString: process.env.DATABASE_URL,
       tableName: "user_sessions",
-      createTableIfMissing: true,
+      // Note: Table is created via schema.ts and db:push, not automatically
     })
   : undefined; // Use in-memory store for development if no DATABASE_URL
 

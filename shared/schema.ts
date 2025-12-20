@@ -228,3 +228,11 @@ export const insertProductImageSchema = createInsertSchema(productImages);
 export type InsertProductImage = z.infer<typeof insertProductImageSchema>;
 export type ProductImage = typeof productImages.$inferSelect;
 
+// Session table for connect-pg-simple
+// This table stores user sessions for authentication
+export const userSessions = pgTable("user_sessions", {
+  sid: varchar("sid").primaryKey(),
+  sess: text("sess").notNull(),
+  expire: timestamp("expire", { withTimezone: true }).notNull(),
+});
+
